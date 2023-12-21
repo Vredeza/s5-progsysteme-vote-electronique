@@ -15,6 +15,13 @@ int pushCommande(Commande* commande){
     return handler(commande);
 }
 
-void init(){
-    // j'initialise le serveur
+void serverInit(const char *db_path){
+    int needInit = database_exists(db_path);
+    sqlite3 *db = database_open(db_path);
+    if (needInit == -1)
+    {
+        printf("La base de données n'existe pas.");
+        printf("Initilisation de la base de données.");
+        database_init(db);
+    }
 }

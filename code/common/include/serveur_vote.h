@@ -8,6 +8,6 @@
 #include "./serveur_handlers.h"
 
 int pushCommande(Commande* commande);
-void init();
+void serverInit(const char *db_path);
 
 #endif //SERVEUR_VOTE_H
