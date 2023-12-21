@@ -20,8 +20,8 @@ void serverInit(const char *db_path){
     sqlite3 *db = database_open(db_path);
     if (needInit == -1)
     {
-        printf("La base de données n'existe pas.");
-        printf("Initilisation de la base de données.");
+        printf("La base de données n'existe pas.\n");
+        printf("Initilisation de la base de données.\n");
         database_init(db);
     }
 }

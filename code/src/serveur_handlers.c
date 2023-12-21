@@ -8,72 +8,72 @@
 #include "stdio.h"
 
 int NOPHandler(Commande* commande){
-    printf("Je suis le handler NOP, j'ai reçu une commande de signature %s", commande->signature);
+    printf("Je suis le handler NOP, j'ai reçu une commande de signature %s\n", commande->signature);
     return 0;
 }
 
 int ajoutElecteurHandler(Commande* commande){
-    printf("Je suis le handler AjoutElecteur, j'ai reçu une commande de signature %s", commande->signature);
+    printf("Je suis le handler AjoutElecteur, j'ai reçu une commande de signature %s\n", commande->signature);
     return 0;
 }
 
 int suppressionElecteurHandler(Commande* commande){
-    printf("Je suis le handler SuppressionElecteur, j'ai reçu une commande de signature %s", commande->signature);
+    printf("Je suis le handler SuppressionElecteur, j'ai reçu une commande de signature %s\n", commande->signature);
     return 0;
 }
 
 int estPresentElecteurHandler(Commande* commande){
-    printf("Je suis le handler EstPrésent, j'ai reçu une commande de signature %s", commande->signature);
+    printf("Je suis le handler EstPrésent, j'ai reçu une commande de signature %s\n", commande->signature);
     return 0;
 }
 
 int listeElecteurHandler(Commande* commande){
-    printf("Je suis le handler ListeElecteurs, j'ai reçu une commande de signature %s", commande->signature);
+    printf("Je suis le handler ListeElecteurs, j'ai reçu une commande de signature %s\n", commande->signature);
     return 0;
 }
 
 int majElecteurHandler(Commande* commande){
-    printf("Je suis le handler MAJElecteur, j'ai reçu une commande de signature %s", commande->signature);
+    printf("Je suis le handler MAJElecteur, j'ai reçu une commande de signature %s\n", commande->signature);
     return 0;
 }
 
 int Handler(Commande* commande){
-    printf("Je suis le handler XXXXXX, j'ai reçu une commande de signature %s", commande->signature);
+    printf("Je suis le handler XXXXXX, j'ai reçu une commande de signature %s\n", commande->signature);
     return 0;
 }
 
 int ajoutElectionHandler(Commande* commande){
-    printf("Je suis le handler ajoutElectionHandler, j'ai reçu une commande de signature %s", commande->signature);
+    printf("Je suis le handler ajoutElectionHandler, j'ai reçu une commande de signature %s\n", commande->signature);
     return 0;
 }
 
 int suppressionElectionHandler(Commande* commande){
-    printf("Je suis le handler suppressionElectionHandler, j'ai reçu une commande de signature %s", commande->signature);
+    printf("Je suis le handler suppressionElectionHandler, j'ai reçu une commande de signature %s\n", commande->signature);
     return 0;
 }
 
 int lectureElectionHandler(Commande* commande){
-    printf("Je suis le handler lectureElectionHandler, j'ai reçu une commande de signature %s", commande->signature);
+    printf("Je suis le handler lectureElectionHandler, j'ai reçu une commande de signature %s\n", commande->signature);
     return 0;
 }
 
 int listeElectionHandler(Commande* commande){
-    printf("Je suis le handler listeElectionHandler, j'ai reçu une commande de signature %s", commande->signature);
+    printf("Je suis le handler listeElectionHandler, j'ai reçu une commande de signature %s\n", commande->signature);
     return 0;
 }
 
 int majElectionHandler(Commande* commande){
-    printf("Je suis le handler majElectionHandler, j'ai reçu une commande de signature %s", commande->signature);
+    printf("Je suis le handler majElectionHandler, j'ai reçu une commande de signature %s\n", commande->signature);
     return 0;
 }
 
 int resultatElectionHandler(Commande* commande){
-    printf("Je suis le handler resultatElectionHandler, j'ai reçu une commande de signature %s", commande->signature);
+    printf("Je suis le handler resultatElectionHandler, j'ai reçu une commande de signature %s\n", commande->signature);
     return 0;
 }
 
 int ajoutVoteHandler(Commande* commande){
-    printf("Je suis le handler ajoutVoteHandler, j'ai reçu une commande de signature %s", commande->signature);
+    printf("Je suis le handler ajoutVoteHandler, j'ai reçu une commande de signature %s\n", commande->signature);
     return 0;
 }
 
