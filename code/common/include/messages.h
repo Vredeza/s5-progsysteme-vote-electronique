@@ -20,13 +20,48 @@ typedef struct
 
 typedef struct
 {
-    char identifiant[ENTITY_ID_SIZE];
+    char identifiant[ENTITY_ID_SIZE]; // à changer selon filtres
 } ListeElecteursCmd;
 
 typedef struct
 {
     char identifiant[ENTITY_ID_SIZE];
 } MAJElecteurCmd;
+
+typedef struct
+{
+    Election election;
+} AjoutElectionCmd;
+
+typedef struct
+{
+    char identifiant[ENTITY_ID_SIZE];
+} SupprimeElectionCmd;
+
+typedef struct
+{
+    char identifiant[ENTITY_ID_SIZE];
+} LireElectionCmd;
+
+typedef struct
+{
+    char identifiant[ENTITY_ID_SIZE]; // inutile
+} ListeElectionsCmd;
+
+typedef struct
+{
+    Election election;
+} MAJElectionCmd;
+
+typedef struct
+{
+    char identifiant[ENTITY_ID_SIZE];
+} ResultatElectionCmd;
+
+typedef struct
+{
+    Vote vote;
+} AjoutVoteCmd;
 
 typedef enum
 {
@@ -35,7 +70,14 @@ typedef enum
     SUPPRIME_ELECTEUR,
     EST_PRESENT,
     LISTE_ELECTEUR,
-    METTRE_A_JOUR_ELECTEUR
+    METTRE_A_JOUR_ELECTEUR,
+    AJOUT_ELECTION,
+    SUPPRIME_ELECTION,
+    LIRE_ELECTION,
+    LISTE_ELECTION,
+    METTRE_A_JOUR_ELECTION,
+    RESULTAT_ELECTION,
+    AJOUT_VOTE
 } CommandType;
 
 //--
@@ -50,6 +92,13 @@ typedef struct
         EstPresentCmd estPresent;
         ListeElecteursCmd listeElecteur;
         MAJElecteurCmd mettreAJourElecteur;
+        AjoutElectionCmd ajoutElection;
+        SupprimeElectionCmd supprimeElection;
+        LireElectionCmd lireElection;
+        ListeElectionsCmd listeElection;
+        MAJElectionCmd mettreAJourElection;
+        ResultatElectionCmd resultatElection;
+        AjoutVoteCmd ajoutVote;
     } commande;
 } Commande;
 
