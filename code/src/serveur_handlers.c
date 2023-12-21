@@ -3,7 +3,7 @@
 //
 
 #include "../common/include/messages.h"
-#include "serveur_handlers.h"
+#include "../common/include/serveur_handlers.h"
 #include "stdio.h"
 
 int NOPHandler(Commande* commande){

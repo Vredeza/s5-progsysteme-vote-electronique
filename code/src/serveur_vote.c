@@ -6,9 +6,15 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#include "serveur_handlers.h"
-#include "serveur_vote.h"
+#include "../common/include/serveur_handlers.h"
+#include "../common/include/serveur_vote.h"
+
+#define TAILLE_FILE_ENTREE = 8
 
 int pushCommande(Commande* commande){
-    return handle(commande);
+    return handler(commande);
+}
+
+void init(){
+    // j'initialise le serveur
 }
