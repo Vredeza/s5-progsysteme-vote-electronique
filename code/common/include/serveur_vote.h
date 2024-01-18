@@ -9,5 +9,6 @@
 
 int pushCommande(Commande* commande);
 void serverInit(const char *db_path);
+void* traitementThread(void* arg);
 
 #endif //SERVEUR_VOTE_H

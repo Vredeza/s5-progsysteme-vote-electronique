@@ -7,7 +7,7 @@
 #include <stdlib.h>
 
 void initCircularBuffer(CircularBuffer *cb, int size) {
-    cb->buffer = (int *)malloc(sizeof(int) * size);
+    cb->buffer = (Commande *)malloc(sizeof(Commande) * size);
     cb->size = size;
     cb->front = -1;
     cb->rear = -1;
@@ -31,7 +31,7 @@ int isEmpty(CircularBuffer *cb) {
     return (cb->front == -1);
 }
 
-void enqueue(CircularBuffer *cb, int data) {
+void enqueue(CircularBuffer *cb, Commande commande) {
     pthread_mutex_lock(&cb->mutex);
     while (isFull(cb)) {
         pthread_cond_wait(&cb->not_full, &cb->mutex);
@@ -42,17 +42,17 @@ void enqueue(CircularBuffer *cb, int data) {
     } else {
         cb->rear = (cb->rear + 1) % cb->size;
     }
-    cb->buffer[cb->rear] = data;
+    cb->buffer[cb->rear] = commande;
     pthread_cond_signal(&cb->not_empty);
     pthread_mutex_unlock(&cb->mutex);
 }
 
-int dequeue(CircularBuffer *cb) {
+Commande dequeue(CircularBuffer *cb) {
     pthread_mutex_lock(&cb->mutex);
     while (isEmpty(cb)) {
         pthread_cond_wait(&cb->not_empty, &cb->mutex);
     }
-    int data = cb->buffer[cb->front];
+    Commande commande = cb->buffer[cb->front];
     if (cb->front == cb->rear) {
         cb->front = -1;
         cb->rear = -1;
@@ -61,5 +61,5 @@ int dequeue(CircularBuffer *cb) {
     }
     pthread_cond_signal(&cb->not_full);
     pthread_mutex_unlock(&cb->mutex);
-    return data;
+    return commande;
 }

@@ -5,10 +5,11 @@
 #ifndef CIRCULAR_BUFFER_H
 #define CIRCULAR_BUFFER_H
 
+#include "messages.h"
 #include <pthread.h>
 
 typedef struct {
-    int *buffer;
+    Commande *buffer;
     int size;
     int front;
     int rear;
@@ -21,7 +22,7 @@ void initCircularBuffer(CircularBuffer *cb, int size);
 void cleanupCircularBuffer(CircularBuffer *cb);
 int isFull(CircularBuffer *cb);
 int isEmpty(CircularBuffer *cb);
-void enqueue(CircularBuffer *cb, int data);
-int dequeue(CircularBuffer *cb);
+void enqueue(CircularBuffer *cb, Commande data);
+Commande dequeue(CircularBuffer *cb);
 
 #endif // CIRCULAR_BUFFER_H
