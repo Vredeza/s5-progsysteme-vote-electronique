@@ -6,20 +6,42 @@
 
 void* enqueueThread(void* arg) {
     CircularBuffer* cb = (CircularBuffer*)arg;
-    for (int i = 0; i < 5; ++i) {
-        usleep(rand() % 400000);
-        enqueue(cb, i);
-        printf("Enqueued: %d\n", i);
-    }
+    Commande commandeAjoutBeatrice = {
+            AJOUT_ELECTEUR,
+            "111111",
+            {"beatrice"}
+    };
+    Commande commandeSuppressionBeatrice = {
+            SUPPRIME_ELECTEUR,
+            "222222",
+            {"beatrice"}
+    };
+    Commande commandeAjoutFrederika = {
+            AJOUT_ELECTEUR,
+            "333333",
+            {"frederika"}
+    };
+    Commande commandeEstCeQueBeatriceExiste = {
+            EST_PRESENT,
+            "444444",
+            {"beatrice"}
+    };
+    enqueue(cb, commandeAjoutBeatrice);
+    usleep(rand() % 400000);
+    enqueue(cb, commandeSuppressionBeatrice);
+    usleep(rand() % 400000);
+    enqueue(cb, commandeAjoutFrederika);
+    usleep(rand() % 400000);
+    enqueue(cb, commandeEstCeQueBeatriceExiste);
     return NULL;
 }
 
 void* dequeueThread(void* arg) {
     CircularBuffer* cb = (CircularBuffer*)arg;
-    for (int i = 0; i < 5; ++i) {
-        usleep(rand() % 400000);
-        int data = dequeue(cb);
-        printf("Dequeued: %d\n", data);
+    for (int i = 0; i < 4; ++i) {
+        usleep(rand() % 800000 + 400000);
+        Commande commande = dequeue(cb);
+        printf("Dequeued: %u %s\n", commande.type, commande.commande.ajoutElecteur.identifiant);
     }
     return NULL;
 }
@@ -27,7 +49,7 @@ void* dequeueThread(void* arg) {
 int main() {
     srand((unsigned int)time(NULL));
     CircularBuffer cb;
-    initCircularBuffer(&cb, 5);
+    initCircularBuffer(&cb, 4);
 
     printf("isFull: %d\n", isFull(&cb));
     printf("isEmpty: %d\n", isEmpty(&cb));
