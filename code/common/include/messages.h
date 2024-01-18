@@ -30,7 +30,7 @@ typedef struct
 
 typedef struct
 {
-    Election election;
+    Election *election;
 } AjoutElectionCmd;
 
 typedef struct
@@ -63,6 +63,11 @@ typedef struct
     Vote vote;
 } AjoutVoteCmd;
 
+typedef struct
+{
+    char message[256];
+} MessageRetour;
+
 typedef enum
 {
     NOP = 0,
@@ -79,7 +84,9 @@ typedef enum
     METTRE_A_JOUR_ELECTION,
     RESULTAT_ELECTION,
 
-    AJOUT_VOTE
+    AJOUT_VOTE,
+
+    MESSAGE_RETOUR
 } CommandType;
 
 //--
@@ -101,6 +108,7 @@ typedef struct
         MAJElectionCmd mettreAJourElection;
         ResultatElectionCmd resultatElection;
         AjoutVoteCmd ajoutVote;
+        MessageRetour messageRetour;
     } commande;
 } Commande;
 
