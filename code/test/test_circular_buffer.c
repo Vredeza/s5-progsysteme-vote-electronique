@@ -26,13 +26,13 @@ void* enqueueThread(void* arg) {
             "444444",
             {"beatrice"}
     };
-    enqueue(cb, commandeAjoutBeatrice);
+    enqueue(cb, &commandeAjoutBeatrice);
     usleep(rand() % 400000);
-    enqueue(cb, commandeSuppressionBeatrice);
+    enqueue(cb, &commandeSuppressionBeatrice);
     usleep(rand() % 400000);
-    enqueue(cb, commandeAjoutFrederika);
+    enqueue(cb, &commandeAjoutFrederika);
     usleep(rand() % 400000);
-    enqueue(cb, commandeEstCeQueBeatriceExiste);
+    enqueue(cb, &commandeEstCeQueBeatriceExiste);
     return NULL;
 }
 
@@ -40,8 +40,8 @@ void* dequeueThread(void* arg) {
     CircularBuffer* cb = (CircularBuffer*)arg;
     for (int i = 0; i < 4; ++i) {
         usleep(rand() % 800000 + 400000);
-        Commande commande = dequeue(cb);
-        printf("Dequeued: %u %s\n", commande.type, commande.commande.ajoutElecteur.identifiant);
+        Commande *commande = dequeue(cb);
+        printf("Dequeued: %u %s\n", commande->type, commande->commande.ajoutElecteur.identifiant);
     }
     return NULL;
 }

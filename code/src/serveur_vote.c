@@ -8,11 +8,11 @@
 #define TAILLE_TABLEAU 8
 
 sqlite3 *db;
-CircularBuffer tableau;
+CircularBuffer tableauEntree;
 int stopTraitement = 0;
 
-int pushCommande(Commande* commande){
-    return handler(commande, db);
+void pushCommande(Commande* commande){
+    enqueue(&tableauEntree, commande);
 }
 
 void serverInit(const char *db_path){
@@ -27,14 +27,15 @@ void serverInit(const char *db_path){
     }
 
     // initialisation du tableau de commandes
-    initCircularBuffer(&tableau, TAILLE_TABLEAU);
+    initCircularBuffer(&tableauEntree, TAILLE_TABLEAU);
 }
 
-void* traitementThread(void* arg) {
-    CircularBuffer* cb = (CircularBuffer*)arg;
+void* traitementThread(void* arg){
     while (!stopTraitement) {
-        Commande commande = dequeue(cb);
-        pushCommande(&commande);
+        Commande commande = *dequeue(&tableauEntree);
+        int reponse = handler(&commande, db);
+        //TODO mettre la réponse dans le buffer de sortie
+        printf("Réponse: %d", reponse);
     }
     return NULL;
 }

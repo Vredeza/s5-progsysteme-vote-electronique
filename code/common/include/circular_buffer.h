@@ -9,7 +9,7 @@
 #include <pthread.h>
 
 typedef struct {
-    Commande *buffer;
+    Commande **buffer;
     int size;
     int front;
     int rear;
@@ -22,7 +22,7 @@ void initCircularBuffer(CircularBuffer *cb, int size);
 void cleanupCircularBuffer(CircularBuffer *cb);
 int isFull(CircularBuffer *cb);
 int isEmpty(CircularBuffer *cb);
-void enqueue(CircularBuffer *cb, Commande data);
-Commande dequeue(CircularBuffer *cb);
+void enqueue(CircularBuffer *cb, Commande *commande);
+Commande *dequeue(CircularBuffer *cb);
 
 #endif // CIRCULAR_BUFFER_H

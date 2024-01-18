@@ -7,7 +7,7 @@
 
 #include "./serveur_handlers.h"
 
-int pushCommande(Commande* commande);
+void pushCommande(Commande* commande);
 void serverInit(const char *db_path);
 void* traitementThread(void* arg);
 
