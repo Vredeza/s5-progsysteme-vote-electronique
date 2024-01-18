@@ -3,10 +3,11 @@
 //
 
 #include "messages.h"
+#include "bd.h"
 
 #ifndef SERVEUR_HANDLERS_H
 #define SERVEUR_HANDLERS_H
 
-int handler(Commande* commande);
+int handler(Commande* commande, sqlite3* db);
 
 #endif //SERVEUR_HANDLERS_H
