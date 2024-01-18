@@ -122,8 +122,15 @@ void readElecteur(sqlite3 *db, const char *numeroID, int size)
     }
     else
     {
-        printf("Erreur de préparation: %s\n", sqlite3_errmsg(db));
+        printf("Erreur de peremption: %s\n", sqlite3_errmsg(db));
     }
+}
+
+void listeElecteur(sqlite3* db) {
+    sqlite3_stmt *stmt;
+    const char *sql = "SELECT * FROM Electeur;";
+
+
 }
 
 int electeurExists(sqlite3 *db, const char *numeroID, int size)
