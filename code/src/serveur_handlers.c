@@ -80,20 +80,21 @@ int majElecteurHandler(MAJElecteurCmd * commande, sqlite3* db){
 int ajoutElectionHandler(AjoutElectionCmd * commande, sqlite3* db){
     int election_existe = electionExiste(commande->election, db);
 
-    if (election_existe) {
-        erreur("L'élection existe déjà.");
-        return 1;
-    } else {
+    if (election_existe == -1) {
         createElection(
                 db,
-                commande->election.identifiant,
-                strlen(commande->election.identifiant),
-                commande->election.question,
-                commande->election.dateDebut,
-                commande->election.dateFin,
-                status_str[commande->election.status]
+                commande->election->identifiant,
+                strlen(commande->election->identifiant),
+                commande->election->question,
+                commande->election->dateDebut,
+                commande->election->dateFin,
+                status_str[commande->election->status]
         );
-        printf("L'élection %s a bien été créée", commande->election.identifiant);
+        printf("L'élection %s a bien été créée\n", commande->election->identifiant);
+
+    } else {
+        erreur("L'élection existe déjà.\n");
+        return 1;
     }
 
     return 0;
@@ -101,7 +102,22 @@ int ajoutElectionHandler(AjoutElectionCmd * commande, sqlite3* db){
 
 int suppressionElectionHandler(SupprimeElectionCmd * commande, sqlite3* db){
 
+    int election_id = Election_getIdFromNumeroID(db, commande->identifiant, strlen(commande->identifiant));
+
+    if (election_id != -1) {
+        deleteElection(
+                db,
+                election_id
+        );
+        printf("L'élection %s a bien été supprimée\n", commande->identifiant);
+
+    } else {
+        erreur("L'élection n'existe pas.\n");
+        return 1;
+    }
+
     return 0;
+
 }
 
 int lectureElectionHandler(LireElectionCmd * commande, sqlite3* db){
