@@ -40,18 +40,44 @@ int main(int argc, char *argv[])
     {
         g_print("Mode verbeux activé\n");
     }
-    if (file_path != NULL)
-    {
+    if (file_path != NULL) {
         serverInit(file_path);
 
-        Commande commande = {
+        Commande commandeAjoutBeatrice = {
                 AJOUT_ELECTEUR,
-                "DAZFANJFHLH",
-                {"euaiebf"}
+                "111111",
+                {"beatrice"}
         };
 
-        pushCommande(&commande);
-    }
+        Commande commandeSuppressionBeatrice = {
+                SUPPRIME_ELECTEUR,
+                "222222",
+                {"beatrice"}
+        };
+
+        Commande commandeAjoutFrederika = {
+                AJOUT_ELECTEUR,
+                "333333",
+                {"frederika"}
+        };
+
+        Commande commandeEstCeQueBeatriceExiste = {
+                EST_PRESENT,
+                "444444",
+                {"beatrice"}
+        };
+
+        pushCommande(&commandeAjoutBeatrice);
+        pushCommande(&commandeAjoutBeatrice);// Affiche une erreur parce que Béatrice existe déjà
+
+        pushCommande(&commandeEstCeQueBeatriceExiste);
+
+        pushCommande(&commandeSuppressionBeatrice);
+        pushCommande(&commandeSuppressionBeatrice);
+        pushCommande(&commandeAjoutFrederika);
+
+        pushCommande(&commandeEstCeQueBeatriceExiste);
+    }// }
     else
     {
         g_print("Aucun chemin de fichier fourni\n");
