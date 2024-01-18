@@ -15,6 +15,13 @@ int NOPHandler(){
     return 0;
 }
 
+/**
+ * @return Positif si existe, négatif sinon
+ */
+int electionExiste(Election* election, sqlite3* db) {
+    return Election_getIdFromNumeroID(db, election->identifiant, strlen(election->identifiant));
+}
+
 int ajoutElecteurHandler(AjoutElecteurCmd* commande, sqlite3* db){
 
     int electeur_extiste = electeurExists(db, commande->identifiant, strlen(commande->identifiant));
@@ -71,6 +78,23 @@ int majElecteurHandler(MAJElecteurCmd * commande, sqlite3* db){
 }
 
 int ajoutElectionHandler(AjoutElectionCmd * commande, sqlite3* db){
+    int election_existe = electionExiste(commande->election, db);
+
+    if (election_existe) {
+        erreur("L'élection existe déjà.");
+        return 1;
+    } else {
+        createElection(
+                db,
+                commande->election.identifiant,
+                strlen(commande->election.identifiant),
+                commande->election.question,
+                commande->election.dateDebut,
+                commande->election.dateFin,
+                status_str[commande->election.status]
+        );
+        printf("L'élection %s a bien été créée", commande->election.identifiant);
+    }
 
     return 0;
 }
