@@ -8,7 +8,7 @@ PROJECTLIB=-lvoting
 
 $(shell mkdir -p $(BUILDDIR))
 
-all: $(BUILDDIR)/test_electeur $(BUILDDIR)/test_election $(BUILDDIR)/test_vote $(BUILDDIR)/test_serveur $(BUILDDIR)/test_serveur_AjoutElecteur
+all: $(BUILDDIR)/test_electeur $(BUILDDIR)/test_election $(BUILDDIR)/test_vote $(BUILDDIR)/test_serveur $(BUILDDIR)/test_serveur_AjoutElecteur $(BUILDDIR)/test_circular_buffer $(BUILDDIR)/test_serveur_election $(BUILDDIR)/test_circular_buffer_messages
 
 
 $(BUILDDIR)/test_electeur: test_electeur.c
@@ -31,6 +31,9 @@ $(BUILDDIR)/test_circular_buffer: test_circular_buffer.c
 
 $(BUILDDIR)/test_serveur: test_serveur_election.c
 	$(CC) test_serveur_election.c $(CFLAGS) $(PROJECTLIBDIR) $(PROJECTLIB) $(LIBS) -o $(BUILDDIR)/test_serveur_election
+
+$(BUILDDIR)/test_circular_buffer_messages: test_circular_buffer_messages.c
+	$(CC) test_circular_buffer_messages.c $(CFLAGS) $(PROJECTLIBDIR) $(PROJECTLIB) -o $(LIBS) -o $(BUILDDIR)/test_circular_buffer_messages
 
 clean:
 	rm $(BUILDDIR)/test_vote; rm $(BUILDDIR)/test_election; rm $(BUILDDIR)/test_electeur; rm $(BUILDDIR)/test_serveur; rm $(BUILDDIR)/test_circular_buffer; rm $(BUILDDIR)/test_serveur_electeur; rm $(BUILDDIR)/test_serveur_election

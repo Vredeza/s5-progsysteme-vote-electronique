@@ -31,11 +31,12 @@ void serverInit(const char *db_path){
 }
 
 void* traitementThread(void* arg){
+    CircularBuffer* cbMessage = (CircularBuffer*) arg;
     while (!stopTraitement) {
         Commande commande = *dequeue(&tableauEntree);
         int reponse = handler(&commande, db);
-        //TODO mettre la réponse dans le buffer de sortie
-        printf("Réponse: %d", reponse);
+        sprintf(commande.commande.messageRetour.message, "Réponse: %d", reponse);
+        enqueue(cbMessage, &commande);
     }
     return NULL;
 }
