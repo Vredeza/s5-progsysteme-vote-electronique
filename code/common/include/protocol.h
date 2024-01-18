@@ -15,6 +15,16 @@ typedef enum
     closed
 } StatusElection;
 
+/*
+ * Pour passer de l'enum StatusElection à une chaîne de charactères.
+ */
+static const char * const status_str[] =
+        {
+                [canceled] = "canceled",
+                [active] = "active",
+                [closed]  = "closed"
+        };
+
 typedef struct
 {
     char identifiant[ENTITY_ID_SIZE];
