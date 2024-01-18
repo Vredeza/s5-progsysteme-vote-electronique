@@ -15,6 +15,7 @@ void deleteElecteur(sqlite3 *db, const char *numeroID, int size);
 void updateElecteur(sqlite3 *db, const char *oldNumeroID, int size1, const char *newNumeroID, int size2);
 void readElecteur(sqlite3 *db, const char *numeroID, int size);
 int getIdFromNumeroID(sqlite3 *db, const char *numeroID, int size);
+void listeElecteur(sqlite3 *db, char ***tableauElecteurs, int *nombreElecteurs);
 
 // usecases election
 void createElection(sqlite3 *db, const char *identifiant, int sizeId, const char *question, const char *dateDebut, const char *dateFin, const char *status);

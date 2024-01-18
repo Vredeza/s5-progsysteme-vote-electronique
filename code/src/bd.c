@@ -10,7 +10,7 @@ const char *electeur_create = "CREATE TABLE IF NOT EXISTS Electeur(id INTEGER PR
 
 const char *election_create = "CREATE TABLE IF NOT EXISTS Election(\
     id INTEGER PRIMARY KEY, \
-    identifiant BLOB ,\
+    identfiant BLOB ,\
     question TEXT CHECK(length(question) <= 256),\
     dateDebut TEXT, \
     dateFin TEXT, \
@@ -126,11 +126,56 @@ void readElecteur(sqlite3 *db, const char *numeroID, int size)
     }
 }
 
-void listeElecteur(sqlite3* db) {
+/*void listeElecteur(sqlite3* db) {
     sqlite3_stmt *stmt;
     const char *sql = "SELECT * FROM Electeur;";
 
 
+
+}*/
+
+void listeElecteur(sqlite3 *db, char ***tableauElecteurs, int *nombreElecteurs) {
+
+    sqlite3_stmt *stmt;
+    const char *sql = "SELECT numeroID FROM Electeur;";
+
+    // Prépare la requête SQL
+    int rc = sqlite3_prepare_v2(db, sql, -1, &stmt, 0);
+
+    if (rc != SQLITE_OK) {
+        fprintf(stderr, "Erreur lors de la préparation de la requête: %s\n", sqlite3_errmsg(db));
+        return;
+    }
+
+    // Initialise le tableau d'électeurs
+    *tableauElecteurs = NULL;
+    *nombreElecteurs = 0;
+
+    // Exécute la requête
+    while (sqlite3_step(stmt) == SQLITE_ROW) {
+        // Réalise une réallocation du tableau d'électeurs
+        *tableauElecteurs = realloc(*tableauElecteurs, (*nombreElecteurs + 1) * sizeof(char *));
+
+        if (!(*tableauElecteurs)) {
+            fprintf(stderr, "Erreur lors de l'allocation de mémoire pour les électeurs\n");
+            return;
+        }
+
+        // Réalise une allocation de mémoire pour le numéroID
+        (*tableauElecteurs)[*nombreElecteurs] = malloc(10);
+
+        if (!(*tableauElecteurs)[*nombreElecteurs]) {
+            fprintf(stderr, "Erreur lors de l'allocation de mémoire pour le numéroID\n");
+            return;
+        }
+
+        // Récupère le numéroID de la base de données et le stocke dans le tableau d'électeurs
+        strcpy((*tableauElecteurs)[*nombreElecteurs], sqlite3_column_text(stmt, 0));
+        (*nombreElecteurs)++;
+    }
+
+    // Finalise la requête préparée
+    sqlite3_finalize(stmt);
 }
 
 int electeurExists(sqlite3 *db, const char *numeroID, int size)
