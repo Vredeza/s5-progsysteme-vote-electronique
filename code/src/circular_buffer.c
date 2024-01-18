@@ -2,7 +2,7 @@
 // Created by Joan on 02/01/2024.
 //
 
-#include "circular_buffer.h"
+#include "../common/include/circular_buffer.h"
 #include <stdio.h>
 #include <stdlib.h>
 
