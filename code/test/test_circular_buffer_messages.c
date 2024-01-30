@@ -1,4 +1,5 @@
 #include "../common/include/circular_buffer.h"
+#include "../common/include/serveur_vote.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
@@ -42,34 +43,33 @@ void* dequeueThread(void* arg) {
         usleep(rand() % 800000 + 400000);
         Commande *commande = dequeue(cb);
         printf("Dequeued: %u %s\n", commande->type, commande->commande.ajoutElecteur.identifiant);
+        printf("Réponse reçue: %s\n", commande->commande.messageRetour.message);
     }
     return NULL;
 }
 
 int main() {
     srand((unsigned int)time(NULL));
-    CircularBuffer cb, cbMessages;
-    initCircularBuffer(&cb, 4);
+    CircularBuffer cbCommandes, cbMessages;
+    initCircularBuffer(&cbCommandes, 4);
     initCircularBuffer(&cbMessages, 4);
 
-    printf("isFull: %d\n", isFull(&cb));
-    printf("isEmpty: %d\n", isEmpty(&cb));
+    printf("isFull: %d\n", isFull(&cbCommandes));
+    printf("isEmpty: %d\n", isEmpty(&cbCommandes));
 
-    pthread_t threadEnqueue, threadDequeue, threadTraiter, threadMessages;
+    pthread_t threadEnqueue, threadDequeue, threadTraiter;
     pthread_create(&threadEnqueue, NULL, enqueueThread, &cbCommandes);
     pthread_create(&threadDequeue, NULL, dequeueThread, &cbCommandes);
     pthread_create(&threadTraiter, NULL, traitementThread, &cbMessages);
-    pthread_create(&threadMessages, NULL, messageThread, &cbMessages);
 
     pthread_join(threadEnqueue, NULL);
     pthread_join(threadDequeue, NULL);
     pthread_join(threadTraiter, NULL);
-    pthread_join(threadMessages, NULL);
 
-    printf("isFull: %d\n", isFull(&cb));
-    printf("isEmpty: %d\n", isEmpty(&cb));
+    printf("isFull: %d\n", isFull(&cbCommandes));
+    printf("isEmpty: %d\n", isEmpty(&cbCommandes));
 
-    cleanupCircularBuffer(&cb);
+    cleanupCircularBuffer(&cbCommandes);
     cleanupCircularBuffer(&cbMessages);
     return 0;
 }
