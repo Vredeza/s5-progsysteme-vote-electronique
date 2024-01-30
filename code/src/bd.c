@@ -519,8 +519,8 @@ void Election_processVotes(sqlite3 *db, int electionId, mpz_t lambda, mpz_t mu, 
 
         while (sqlite3_step(stmt) == SQLITE_ROW)
         {
-            const void *ballotBlob = sqlite3_column_blob(stmt, 4);
-            int blobSize = sqlite3_column_bytes(stmt, 4);
+            const void *ballotBlob = sqlite3_column_blob(stmt, 0);
+            int blobSize = sqlite3_column_bytes(stmt, 0);
 
             // Decrypt le vote
             mpz_t encrypted_ballot, decrypted_ballot;
