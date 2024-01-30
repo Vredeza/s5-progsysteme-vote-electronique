@@ -47,14 +47,9 @@ char* format(const char* formatString, ...) {
  * Envoi le message de retour au buffer approprié
  * @param message Le message a renvoyer.
  */
-void retour(char* message, char* messageRetour){
-
-    messageRetour = (char *)malloc(strlen(message) + 1);
-    strcpy(messageRetour, message);
-
-    printf("%s", messageRetour);
-
-    free(message);
+void retour(char* message, char** messageRetour){
+    *messageRetour = (char *) malloc(strlen(message) + 1);
+    strcpy(*messageRetour, message);
 }
 
 int NOPHandler(){
@@ -69,7 +64,7 @@ int electionExiste(Election* election, sqlite3* db) {
     return Election_getIdFromNumeroID(db, election->identifiant, strlen(election->identifiant));
 }
 
-int ajoutElecteurHandler(AjoutElecteurCmd* commande, sqlite3* db, char* messageRetour){
+int ajoutElecteurHandler(AjoutElecteurCmd* commande, sqlite3* db, char** messageRetour){
 
     int electeur_extiste = electeurExists(db, commande->identifiant, strlen(commande->identifiant));
 
@@ -84,13 +79,13 @@ int ajoutElecteurHandler(AjoutElecteurCmd* commande, sqlite3* db, char* messageR
     return 0;
 }
 
-int suppressionElecteurHandler(SupprimeElecteurCmd * commande, sqlite3* db, char* messageRetour){
+int suppressionElecteurHandler(SupprimeElecteurCmd * commande, sqlite3* db, char** messageRetour){
 
     int electeur_extiste = electeurExists(db, commande->identifiant, strlen(commande->identifiant));
 
     if (electeur_extiste){
         deleteElecteur(db, commande->identifiant, strlen(commande->identifiant));
-        printf("Electeur supprimé.\n");
+        retour("Electeur supprimé.",messageRetour);
     } else {
         retour("L'electeur n'existe pas.",messageRetour);
         return 1;
@@ -99,7 +94,7 @@ int suppressionElecteurHandler(SupprimeElecteurCmd * commande, sqlite3* db, char
     return 0;
 }
 
-int estPresentElecteurHandler(EstPresentCmd * commande, sqlite3* db, char* messageRetour){
+int estPresentElecteurHandler(EstPresentCmd * commande, sqlite3* db, char** messageRetour){
 
     int electeur_extiste = electeurExists(db, commande->identifiant, strlen(commande->identifiant));
 
@@ -113,7 +108,7 @@ int estPresentElecteurHandler(EstPresentCmd * commande, sqlite3* db, char* messa
     return 0;
 }
 
-int listeElecteurHandler(ListeElecteursCmd * commande, sqlite3* db, char* messageRetour){
+int listeElecteurHandler(ListeElecteursCmd * commande, sqlite3* db, char** messageRetour){
 
     char **tableauElecteurs;
     int nombreElecteurs;
@@ -137,7 +132,7 @@ int listeElecteurHandler(ListeElecteursCmd * commande, sqlite3* db, char* messag
     return 0;
 }
 
-int majElecteurHandler(MAJElecteurCmd * commande, sqlite3* db, char* messageRetour){
+int majElecteurHandler(MAJElecteurCmd * commande, sqlite3* db, char** messageRetour){
     int nouvelleIDDejaExistant= electeurExists(db, commande->NewIdentifiant, strlen(commande->NewIdentifiant));
 
     if (nouvelleIDDejaExistant) {
@@ -151,7 +146,7 @@ int majElecteurHandler(MAJElecteurCmd * commande, sqlite3* db, char* messageReto
     return 0;
 }
 
-int ajoutElectionHandler(AjoutElectionCmd * commande, sqlite3* db, char* messageRetour){
+int ajoutElectionHandler(AjoutElectionCmd * commande, sqlite3* db, char** messageRetour){
     int election_existe = electionExiste(commande->election, db);
 
     if (election_existe == -1) {
@@ -174,7 +169,7 @@ int ajoutElectionHandler(AjoutElectionCmd * commande, sqlite3* db, char* message
     return 0;
 }
 
-int suppressionElectionHandler(SupprimeElectionCmd * commande, sqlite3* db, char* messageRetour){
+int suppressionElectionHandler(SupprimeElectionCmd * commande, sqlite3* db, char** messageRetour){
 
     int election_id = Election_getIdFromNumeroID(db, commande->identifiant, strlen(commande->identifiant));
 
@@ -193,7 +188,7 @@ int suppressionElectionHandler(SupprimeElectionCmd * commande, sqlite3* db, char
 
 }
 
-int lectureElectionHandler(LireElectionCmd * commande, sqlite3* db, char* messageRetour){
+int lectureElectionHandler(LireElectionCmd * commande, sqlite3* db, char** messageRetour){
     int election_id = Election_getIdFromNumeroID(db, commande->identifiant, strlen(commande->identifiant));
 
     if (election_id == -1) { // si ça existe pass
@@ -221,7 +216,7 @@ int lectureElectionHandler(LireElectionCmd * commande, sqlite3* db, char* messag
     return 0;
 }
 
-int listeElectionHandler(ListeElectionsCmd * commande, sqlite3* db, char* messageRetour){
+int listeElectionHandler(ListeElectionsCmd * commande, sqlite3* db, char** messageRetour){
 
     Election *elections;
     int numElections;
@@ -246,7 +241,7 @@ int listeElectionHandler(ListeElectionsCmd * commande, sqlite3* db, char* messag
     return 0;
 }
 
-int majElectionHandler(MAJElectionCmd * commande, sqlite3* db, char* messageRetour){
+int majElectionHandler(MAJElectionCmd * commande, sqlite3* db, char** messageRetour){
 
     int election_id = Election_getIdFromNumeroID(db, commande->election.identifiant, strlen(commande->election.identifiant));
 
@@ -262,12 +257,12 @@ int majElectionHandler(MAJElectionCmd * commande, sqlite3* db, char* messageReto
     return 0;
 }
 
-int resultatElectionHandler(ResultatElectionCmd * commande, sqlite3* db, char* messageRetour){
+int resultatElectionHandler(ResultatElectionCmd * commande, sqlite3* db, char** messageRetour){
 
     return 0;
 }
 
-int ajoutVoteHandler(AjoutVoteCmd * commande, sqlite3* db, char* messageRetour){
+int ajoutVoteHandler(AjoutVoteCmd * commande, sqlite3* db, char** messageRetour){
     //printf("Je suis le handler ajoutVoteHandler, j'ai reçu une commande de signature %s", commande->signature);
     return 0;
 }
@@ -276,7 +271,7 @@ int ajoutVoteHandler(AjoutVoteCmd * commande, sqlite3* db, char* messageRetour){
  * Gère une commande passée en paramètre.
  * Stratégie : délègue le travail à un handler spécifique. Voir command pattern.
  */
-int handler(Commande* commande, sqlite3* db, char* messageRetour){
+int handler(Commande* commande, sqlite3* db, char** messageRetour){
     switch (commande->type) {
         case NOP: return NOPHandler();
             break;

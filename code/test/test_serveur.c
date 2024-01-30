@@ -3,6 +3,7 @@
 #include <glib.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <sys/stat.h>
 
 #define V if (verbose)
@@ -23,7 +24,7 @@ int main(int argc, char *argv[])
             {NULL}};
 
     // Création d'un contexte d'option
-    context = g_option_context_new("- Test d'utilisaton du serveur");
+    context = g_option_context_new("- Test d'utilisation du serveur");
     g_option_context_add_main_entries(context, entries, NULL);
 
     // Analyse des options de ligne de commande
@@ -48,19 +49,16 @@ int main(int argc, char *argv[])
                 "111111",
                 {"beatrice"}
         };
-
         Commande commandeSuppressionBeatrice = {
                 SUPPRIME_ELECTEUR,
                 "222222",
                 {"beatrice"}
         };
-
         Commande commandeAjoutFrederika = {
                 AJOUT_ELECTEUR,
                 "333333",
                 {"frederika"}
         };
-
         Commande commandeEstCeQueBeatriceExiste = {
                 EST_PRESENT,
                 "444444",
@@ -68,16 +66,16 @@ int main(int argc, char *argv[])
         };
 
         pushCommande(&commandeAjoutBeatrice);
-        pushCommande(&commandeAjoutBeatrice);// Affiche une erreur parce que Béatrice existe déjà
-
+        pushCommande(&commandeAjoutBeatrice);// Affichera une erreur parce que Béatrice existe déjà
         pushCommande(&commandeEstCeQueBeatriceExiste);
-
         pushCommande(&commandeSuppressionBeatrice);
         pushCommande(&commandeSuppressionBeatrice);
         pushCommande(&commandeAjoutFrederika);
-
         pushCommande(&commandeEstCeQueBeatriceExiste);
-    }// }
+
+        sleep(3);
+        serverStop();
+    }
     else
     {
         g_print("Aucun chemin de fichier fourni\n");
