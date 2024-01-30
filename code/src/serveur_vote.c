@@ -35,12 +35,6 @@ int serverInit(const char *db_path){
         printf("Erreur lors de la création du thread\n");
         return 1;
     }
-
-    // Attente de la fin du thread de traitement
-    if (pthread_join(traitementPid, NULL) != 0){
-        fprintf(stderr, "Erreur lors du join du thread\n");
-        return 1;
-    }
 }
 
 void* traitementThread(void* arg){
