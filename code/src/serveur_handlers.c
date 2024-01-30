@@ -138,7 +138,16 @@ int listeElecteurHandler(ListeElecteursCmd * commande, sqlite3* db, char* messag
 }
 
 int majElecteurHandler(MAJElecteurCmd * commande, sqlite3* db, char* messageRetour){
-    //printf("Je suis le handler MAJElecteur, j'ai reçu une commande de signature %s", commande->signature);
+    int nouvelleIDDejaExistant= electeurExists(db, commande->NewIdentifiant, strlen(commande->NewIdentifiant));
+
+    if (nouvelleIDDejaExistant) {
+        retour(format("L'Id %s est déjà occupé.", commande->NewIdentifiant), messageRetour);
+    }
+    else {
+        updateElecteur(db, commande->OldIdentifiant, strlen(commande->OldIdentifiant), commande->NewIdentifiant, strlen(commande->NewIdentifiant));
+        retour("L'Id a été modifié", messageRetour);
+    }
+
     return 0;
 }
 

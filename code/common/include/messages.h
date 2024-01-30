@@ -25,7 +25,8 @@ typedef struct
 
 typedef struct
 {
-    char identifiant[ENTITY_ID_SIZE];
+    char NewIdentifiant[ENTITY_ID_SIZE];
+    char OldIdentifiant[ENTITY_ID_SIZE];
 } MAJElecteurCmd;
 
 typedef struct
