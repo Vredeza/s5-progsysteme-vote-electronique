@@ -1,6 +1,6 @@
 CC=gcc
-CFLAGS=`pkg-config --cflags glib-2.0 sqlite3`
-LIBS=`pkg-config --libs glib-2.0 sqlite3` -lsqlite3 
+CFLAGS=`pkg-config --cflags glib-2.0 sqlite3 gmp`
+LIBS=`pkg-config --libs glib-2.0 sqlite3 gmp` -lsqlite3
 AR=ar
 ARFLAGS=rcs
 BUILDDIR=../build

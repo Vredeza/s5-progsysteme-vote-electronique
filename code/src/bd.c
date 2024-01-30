@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <sys/stat.h>
 #include <string.h>
+#include <gmp.h>
+#include "../common/include/crypto.h"
 
 const char *electeur_create = "CREATE TABLE IF NOT EXISTS Electeur(id INTEGER PRIMARY KEY, numeroID BLOB);";
 
@@ -465,16 +467,21 @@ void deleteElection(sqlite3 *db, int id)
 
 // usecases election
 
-void Election_castVote(sqlite3 *db, int idVotant, int idElection, const void *ballot, int ballotSize, const char *hashValidation)
+void Election_castVote(sqlite3 *db, int idVotant, int idElection, mpz_t encrypted_ballot, int ballotSize, const char *hashValidation)
 {
     sqlite3_stmt *stmt;
     const char *sql = "INSERT INTO Vote (idVotant, idElection, timestamp, ballot, hashValidation) VALUES (?, ?, datetime('now'), ?, ?);";
+
+    // Convert mpz_t to binary for storing
+    size_t size;
+    unsigned char *ballot_data = (unsigned char *)mpz_export(NULL, &size, 1, 1, 0, 0, encrypted_ballot);
+    ballotSize = (int)size; // Update the size of the binary data
 
     if (sqlite3_prepare_v2(db, sql, -1, &stmt, NULL) == SQLITE_OK)
     {
         sqlite3_bind_int(stmt, 1, idVotant);
         sqlite3_bind_int(stmt, 2, idElection);
-        sqlite3_bind_blob(stmt, 3, ballot, ballotSize, SQLITE_STATIC);
+        sqlite3_bind_blob(stmt, 3, ballot_data, ballotSize, SQLITE_STATIC);
         sqlite3_bind_text(stmt, 4, hashValidation, -1, SQLITE_STATIC);
 
         if (sqlite3_step(stmt) != SQLITE_DONE)
@@ -492,13 +499,16 @@ void Election_castVote(sqlite3 *db, int idVotant, int idElection, const void *ba
     {
         fprintf(stderr, "Erreur de préparation: %s\n", sqlite3_errmsg(db));
     }
+
+    // Free the allocated memory for ballot_data
+    free(ballot_data);
 }
 
 //
-void Election_processVotes(sqlite3 *db, int electionId, int *p_option0, int *p_option1, int *p_totalvotes)
+void Election_processVotes(sqlite3 *db, int electionId, mpz_t lambda, mpz_t mu, mpz_t n, int *p_option0, int *p_option1, int *p_totalvotes)
 {
     sqlite3_stmt *stmt;
-    const char *sql = "SELECT * FROM Vote WHERE idElection = ?;";
+    const char *sql = "SELECT ballot FROM Vote WHERE idElection = ?;";
     *p_totalvotes = 0;
     *p_option0 = 0;
     *p_option1 = 0;
@@ -509,17 +519,19 @@ void Election_processVotes(sqlite3 *db, int electionId, int *p_option0, int *p_o
 
         while (sqlite3_step(stmt) == SQLITE_ROW)
         {
-            // Récupérer les données de chaque vote
-            int voteId = sqlite3_column_int(stmt, 0); // id
-            // Autres colonnes peuvent être récupérées ici
             const void *ballotBlob = sqlite3_column_blob(stmt, 4);
             int blobSize = sqlite3_column_bytes(stmt, 4);
-            // Traiter les données du vote
-            // printf("Traitement du vote ID: %d\n", voteId);
-            // Ajoutez ici le code pour traiter chaque vote
-            *p_totalvotes = *p_totalvotes + 1;
-            int v = *((char *)ballotBlob);
-            if (v)
+
+            // Decrypt le vote
+            mpz_t encrypted_ballot, decrypted_ballot;
+            mpz_init(encrypted_ballot);
+            mpz_import(encrypted_ballot, blobSize, 1, 1, 0, 0, ballotBlob);
+
+            mpz_init(decrypted_ballot);
+            decrypt(decrypted_ballot, encrypted_ballot, lambda, mu, n);
+
+            char vote = (char)mpz_get_ui(decrypted_ballot);
+            if (vote)
             {
                 *p_option1 = *p_option1 + 1;
             }
@@ -527,6 +539,10 @@ void Election_processVotes(sqlite3 *db, int electionId, int *p_option0, int *p_o
             {
                 *p_option0 = *p_option0 + 1;
             }
+
+            *p_totalvotes = *p_totalvotes + 1;
+
+            mpz_clears(encrypted_ballot, decrypted_ballot, NULL);
         }
 
         sqlite3_finalize(stmt);
@@ -536,3 +552,6 @@ void Election_processVotes(sqlite3 *db, int electionId, int *p_option0, int *p_o
         fprintf(stderr, "Erreur de préparation: %s\n", sqlite3_errmsg(db));
     }
 }
+
+
+//int Election_resultat(sqlite3 *db, int localid, int *numberOption0, int *numberOption1, int *totalVotes)

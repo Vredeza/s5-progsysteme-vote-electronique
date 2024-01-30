@@ -1,6 +1,6 @@
 CC=gcc
-CFLAGS=`pkg-config --cflags glib-2.0 sqlite3`
-LIBS=`pkg-config --libs glib-2.0 sqlite3` 
+CFLAGS=`pkg-config --cflags glib-2.0 sqlite3 gmp`
+LIBS=`pkg-config --libs glib-2.0 sqlite3 gmp`
 BUILDDIR=../build
 PROJECTLIBDIR=-L../build/lib
 PROJECTLIB=-lvoting
@@ -8,7 +8,7 @@ PROJECTLIB=-lvoting
 
 $(shell mkdir -p $(BUILDDIR))
 
-all: $(BUILDDIR)/test_electeur $(BUILDDIR)/test_election $(BUILDDIR)/test_serveur_electeur $(BUILDDIR)/test_vote $(BUILDDIR)/test_serveur $(BUILDDIR)/test_circular_buffer $(BUILDDIR)/test_serveur_election $(BUILDDIR)/test_circular_buffer_messages
+all: $(BUILDDIR)/test_electeur $(BUILDDIR)/test_election $(BUILDDIR)/test_serveur_electeur $(BUILDDIR)/test_vote $(BUILDDIR)/test_serveur $(BUILDDIR)/test_circular_buffer $(BUILDDIR)/test_serveur_election $(BUILDDIR)/test_circular_buffer_messages $(BUILDDIR)/test_crypto
 
 
 $(BUILDDIR)/test_electeur: test_electeur.c
@@ -35,5 +35,8 @@ $(BUILDDIR)/test_serveur_election: test_serveur_election.c
 $(BUILDDIR)/test_circular_buffer_messages: test_circular_buffer_messages.c
 	$(CC) test_circular_buffer_messages.c $(CFLAGS) $(PROJECTLIBDIR) $(PROJECTLIB) -o $(LIBS) -o $(BUILDDIR)/test_circular_buffer_messages
 
+$(BUILDDIR)/test_crypto: test_crypto.c
+	$(CC) test_crypto.c $(CFLAGS) $(PROJECTLIBDIR) $(PROJECTLIB) $(LIBS) -lgmp -o $(BUILDDIR)/test_crypto.bin
+
 clean:
-	rm $(BUILDDIR)/test_vote; rm $(BUILDDIR)/test_election; rm $(BUILDDIR)/test_electeur; rm $(BUILDDIR)/test_serveur; rm $(BUILDDIR)/test_circular_buffer; rm $(BUILDDIR)/test_serveur_electeur; rm $(BUILDDIR)/test_serveur_election
+	rm $(BUILDDIR)/test_vote; rm $(BUILDDIR)/test_election; rm $(BUILDDIR)/test_electeur; rm $(BUILDDIR)/test_serveur; rm $(BUILDDIR)/test_circular_buffer; rm $(BUILDDIR)/test_serveur_electeur; rm $(BUILDDIR)/test_serveur_election; rm $(BUILDDIR)/test_crypto
