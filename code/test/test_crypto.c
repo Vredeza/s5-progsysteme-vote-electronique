@@ -74,32 +74,21 @@ int main(int argc, char *argv[]) {
         int electeur_n01 = getIdFromNumeroID(db, idElecteur1, ID_SIZE);
         int electeur_n02 = getIdFromNumeroID(db, idElecteur2, ID_SIZE);
 
-        // Initialize and generate crypto keys
+        // Initialization des variables crypto
         mpz_t n, lambda, g, mu, encrypted_ballot;
         mpz_inits(n, lambda, g, mu, NULL);
         generate_keys(n, lambda, g, mu);
 
-        // Check if keys are generated and print their values
-        if (mpz_sgn(n) != 0 && mpz_sgn(lambda) != 0 && mpz_sgn(g) != 0 && mpz_sgn(mu) != 0) {
-            gmp_printf("Keys generated successfully.\n");
-            gmp_printf("n: %Zd\n", n);
-            gmp_printf("lambda: %Zd\n", lambda);
-            gmp_printf("g: %Zd\n", g);
-            gmp_printf("mu: %Zd\n", mu);
-        } else {
-            g_print("Error: Key generation failed.\n");
-            // Handle key generation failure
-        }
-
-        // Encrypt and cast votes
+        // Cryptage des votes et insertion dans la base de données
         mpz_init(encrypted_ballot);
         encrypt_vote(encrypted_ballot, 0x01, n, g); // Encrypt vote 1
         Election_castVote(db, electeur_n01, election_LocalId, mpz_export(NULL, NULL, 1, BALLOT_SIZE, 0, 0, encrypted_ballot), BALLOT_SIZE, "TODO");
         encrypt_vote(encrypted_ballot, 0x00, n, g); // Encrypt vote 2
         Election_castVote(db, electeur_n02, election_LocalId, mpz_export(NULL, NULL, 1, BALLOT_SIZE, 0, 0, encrypted_ballot), BALLOT_SIZE, "TODO");
+
         mpz_clear(encrypted_ballot);
 
-        // Retrieve and decrypt votes
+        // recuperation des votes
         sqlite3_stmt *stmt;
         const char *sql = "SELECT ballot FROM Vote WHERE idElection = ?;";
         int no = 0, yes = 0, total = 0;
@@ -111,7 +100,7 @@ int main(int argc, char *argv[]) {
                 const void *ballotBlob = sqlite3_column_blob(stmt, 0);
                 int blobSize = sqlite3_column_bytes(stmt, 0);
 
-                // Decrypt the vote
+                // Decryptage du vote
                 mpz_t decrypted_ballot;
                 mpz_init(decrypted_ballot);
                 mpz_import(encrypted_ballot, blobSize, 1, 1, 0, 0, ballotBlob);
@@ -133,7 +122,7 @@ int main(int argc, char *argv[]) {
             fprintf(stderr, "Erreur de préparation: %s\n", sqlite3_errmsg(db));
         }
 
-        // Display results
+        // Affichage des résultats
         g_print("Total votes: %d, Yes: %d, No: %d\n", total, yes, no);
 
 
