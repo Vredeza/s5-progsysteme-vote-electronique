@@ -31,13 +31,13 @@ void serverInit(const char *db_path){
     initCircularBuffer(&tableauEntree, TAILLE_TABLEAU);
 
     // Exécution du thread de traitement
-    if (pthread_create(&traitementPid, NULL, traitementThread, NULL) != 0) {
+    if (pthread_create(&traitementPid, NULL, traitementThread, NULL) != 0){
         printf("Erreur lors de la création du thread\n");
         return 1;
     }
 
     // Attente de la fin du thread de traitement
-    if (pthread_join(traitementPid, NULL) != 0) {
+    if (pthread_join(traitementPid, NULL) != 0){
         fprintf(stderr, "Erreur lors du join du thread\n");
         return 1;
     }
