@@ -5,7 +5,6 @@
 #include "../common/include/serveur_handlers.h"
 #include "stdio.h"
 #include "string.h"
-#include <glib.h>
 #include <stdlib.h>
 #include <sys/stat.h>
 #include <stdlib.h>
@@ -59,6 +58,7 @@ void retour(char* message, char* messageRetour){
 }
 
 int NOPHandler(){
+    printf("Je suis le handler NOP, j'ai reçu une commande.\n");
     return 0;
 }
 
@@ -90,9 +90,9 @@ int suppressionElecteurHandler(SupprimeElecteurCmd * commande, sqlite3* db, char
 
     if (electeur_extiste){
         deleteElecteur(db, commande->identifiant, strlen(commande->identifiant));
-        retour(format("Electeur %s supprimé.", commande->identifiant), messageRetour);
+        printf("Electeur supprimé.\n");
     } else {
-        retour(format("L'electeur %s n'existe pas.", commande->identifiant), messageRetour);
+        retour("L'electeur n'existe pas.",messageRetour);
         return 1;
     }
 
@@ -238,7 +238,18 @@ int listeElectionHandler(ListeElectionsCmd * commande, sqlite3* db, char* messag
 }
 
 int majElectionHandler(MAJElectionCmd * commande, sqlite3* db, char* messageRetour){
-    //printf("Je suis le handler majElectionHandler, j'ai reçu une commande de signature %s", commande->signature);
+
+    int election_id = Election_getIdFromNumeroID(db, commande->election.identifiant, strlen(commande->election.identifiant));
+
+    if (election_id == -1) { // si ça existe pass
+        retour("L'élection n'existe pas.", messageRetour);
+        return 1;
+    } else {
+        updateElection(db, election_id, commande->election.question);
+
+        retour(format("L'élection %s a bien été modifié", commande->election.identifiant), messageRetour);
+    }
+
     return 0;
 }
 
