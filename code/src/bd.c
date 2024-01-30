@@ -3,14 +3,12 @@
 #include <stdlib.h>
 #include <sys/stat.h>
 #include <string.h>
-#include <sys/types.h>
-#include <unistd.h>
 
 const char *electeur_create = "CREATE TABLE IF NOT EXISTS Electeur(id INTEGER PRIMARY KEY, numeroID BLOB);";
 
 const char *election_create = "CREATE TABLE IF NOT EXISTS Election(\
     id INTEGER PRIMARY KEY, \
-    identfiant BLOB ,\
+    identifiant BLOB ,\
     question TEXT CHECK(length(question) <= 256),\
     dateDebut TEXT, \
     dateFin TEXT, \
@@ -333,8 +331,7 @@ int Election_getIdFromNumeroID(sqlite3 *db, const char *numeroID, int size)
     return id;
 }
 
-// TODO
-void readElection(sqlite3 *db, int id)
+void readElection(sqlite3 *db, int id, Election *election)
 {
     sqlite3_stmt *stmt;
     const char *sql = "SELECT * FROM Election WHERE id = ?;";
@@ -343,10 +340,27 @@ void readElection(sqlite3 *db, int id)
     {
         sqlite3_bind_int(stmt, 1, id);
 
-        while (sqlite3_step(stmt) == SQLITE_ROW)
+        if (sqlite3_step(stmt) == SQLITE_ROW)
         {
-            // Traiter les résultats ici
-            // Exemple : printf("%s\n", sqlite3_column_text(stmt, 2)); // Pour la colonne 'question'
+            // Récupérer les valeurs depuis la base de données et les stocker dans la structure Election
+            snprintf(election->identifiant, sizeof(election->identifiant), "%s", sqlite3_column_text(stmt, 1));
+            snprintf(election->question, sizeof(election->question), "%s", sqlite3_column_text(stmt, 2));
+            snprintf(election->dateDebut, sizeof(election->dateDebut), "%s", sqlite3_column_text(stmt, 3));
+            snprintf(election->dateFin, sizeof(election->dateFin), "%s", sqlite3_column_text(stmt, 4));
+
+            const char *statusStr = (const char *)sqlite3_column_text(stmt, 5);
+            if (strcmp(statusStr, "canceled") == 0)
+                election->status = canceled;
+            else if (strcmp(statusStr, "active") == 0)
+                election->status = active;
+            else if (strcmp(statusStr, "closed") == 0)
+                election->status = closed;
+            else
+                fprintf(stderr, "Erreur : Statut inconnu\n");
+        }
+        else
+        {
+            fprintf(stderr, "Aucun enregistrement trouvé pour l'ID %d\n", id);
         }
 
         sqlite3_finalize(stmt);
@@ -354,6 +368,53 @@ void readElection(sqlite3 *db, int id)
     else
     {
         fprintf(stderr, "Erreur de préparation: %s\n", sqlite3_errmsg(db));
+    }
+}
+
+void listeElection(sqlite3 *db, Election **elections, int *numElections)
+{
+    sqlite3_stmt *stmt;
+    const char *sql = "SELECT COUNT(*) FROM Election;";
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, NULL) == SQLITE_OK)
+    {
+        if (sqlite3_step(stmt) == SQLITE_ROW)
+        {
+            *numElections = sqlite3_column_int(stmt, 0);
+        }
+
+        sqlite3_finalize(stmt);
+    }
+    else
+    {
+        fprintf(stderr, "Erreur de préparation: %s\n", sqlite3_errmsg(db));
+        return;
+    }
+
+    *elections = (Election *)malloc(*numElections * sizeof(Election));
+    if (*elections == NULL)
+    {
+        fprintf(stderr, "Erreur d'allocation de mémoire\n");
+        return;
+    }
+
+    sql = "SELECT id FROM Election;";
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, NULL) == SQLITE_OK)
+    {
+        int i = 0;
+        while (sqlite3_step(stmt) == SQLITE_ROW)
+        {
+            int id = sqlite3_column_int(stmt, 0);
+            readElection(db, id, &((*elections)[i]));
+            i++;
+        }
+
+        sqlite3_finalize(stmt);
+    }
+    else
+    {
+        fprintf(stderr, "Erreur de préparation: %s\n", sqlite3_errmsg(db));
+        free(*elections);
+        return;
     }
 }
 

@@ -8,13 +8,57 @@
 #include <glib.h>
 #include <stdlib.h>
 #include <sys/stat.h>
+#include <stdlib.h>
+#include <stdarg.h>
 
-void erreur(char* message) {
-    printf("Erreur : %s\n", message);
+
+/**
+ * Formate une chaîne de caractères, à la manière de printf().
+ * @param formatString La chaîne de caractères (avec des %s, par exemple).
+ * @param ... Les valeurs qui remplaceront les ancres dans la chaîne de caractères.
+ * @return La chaîne de caractères formatée.
+ */
+char* format(const char* formatString, ...) {
+    // Initialiser la liste variable d'arguments
+    va_list args;
+    va_start(args, formatString);
+
+    // Déterminer la taille nécessaire pour la chaîne formatée
+    int bufferSize = vsnprintf(NULL, 0, formatString, args);
+
+    // Terminer l'utilisation de la liste variable d'arguments
+    va_end(args);
+
+    // Allouer de la mémoire pour la chaîne formatée
+    char* formattedMessage = (char*)malloc(bufferSize + 1);
+
+    // Réinitialiser la liste variable d'arguments
+    va_start(args, formatString);
+
+    // Formater la chaîne et stocker le résultat dans formattedMessage
+    vsnprintf(formattedMessage, bufferSize + 1, formatString, args);
+
+    // Terminer l'utilisation de la liste variable d'arguments
+    va_end(args);
+
+    return formattedMessage;
+}
+
+/**
+ * Envoi le message de retour au buffer approprié
+ * @param message Le message a renvoyer.
+ */
+void retour(char* message, char* messageRetour){
+
+    messageRetour = (char *)malloc(strlen(message) + 1);
+    strcpy(messageRetour, message);
+
+    printf("%s", messageRetour);
+
+    free(message);
 }
 
 int NOPHandler(){
-    printf("Je suis le handler NOP, j'ai reçu une commande.\n");
     return 0;
 }
 
@@ -30,10 +74,10 @@ int ajoutElecteurHandler(AjoutElecteurCmd* commande, sqlite3* db, char* messageR
     int electeur_extiste = electeurExists(db, commande->identifiant, strlen(commande->identifiant));
 
     if (!electeur_extiste) {
-        printf("Création de l'électeur %s\n", commande->identifiant);
+        retour(format("Création de l'électeur %s", commande->identifiant), messageRetour);
         createElecteur(db, commande->identifiant, strlen(commande->identifiant));
     } else {
-        erreur("L'electeur existe déjà.");
+        retour("L'electeur existe déjà.", messageRetour);
         return 1;
     }
 
@@ -46,9 +90,9 @@ int suppressionElecteurHandler(SupprimeElecteurCmd * commande, sqlite3* db, char
 
     if (electeur_extiste){
         deleteElecteur(db, commande->identifiant, strlen(commande->identifiant));
-        printf("Electeur supprimé.\n");
+        retour(format("Electeur %s supprimé.", commande->identifiant), messageRetour);
     } else {
-        erreur("L'electeur n'existe pas.");
+        retour(format("L'electeur %s n'existe pas.", commande->identifiant), messageRetour);
         return 1;
     }
 
@@ -60,16 +104,16 @@ int estPresentElecteurHandler(EstPresentCmd * commande, sqlite3* db, char* messa
     int electeur_extiste = electeurExists(db, commande->identifiant, strlen(commande->identifiant));
 
     if (electeur_extiste) {
-        printf("L'electeur %s existe.\n", commande->identifiant);
+        retour(format("L'electeur %s existe.", commande->identifiant), messageRetour);
     }
     else {
-        printf("L'electeur %s n'existe pas.\n", commande->identifiant);
+        retour(format("L'electeur %s n'existe pas.", commande->identifiant), messageRetour);
     }
 
     return 0;
 }
 
-int listeElecteurHandler(Commande * commande, sqlite3* db, char* messageRetour){
+int listeElecteurHandler(ListeElecteursCmd * commande, sqlite3* db, char* messageRetour){
 
     char **tableauElecteurs;
     int nombreElecteurs;
@@ -88,7 +132,6 @@ int listeElecteurHandler(Commande * commande, sqlite3* db, char* messageRetour){
         // Libère la mémoire allouée pour le tableau d'électeurs
         free(tableauElecteurs);
     }else {
-        erreur("Une erreur est survenue\n");
         return 1;
     }
     return 0;
@@ -112,10 +155,10 @@ int ajoutElectionHandler(AjoutElectionCmd * commande, sqlite3* db, char* message
                 commande->election->dateFin,
                 status_str[commande->election->status]
         );
-        printf("L'élection %s a bien été créée\n", commande->election->identifiant);
+        retour(format("L'élection %s a bien été créée", commande->election->identifiant), messageRetour);
 
     } else {
-        erreur("L'élection existe déjà.\n");
+        retour("L'élection existe déjà.", messageRetour);
         return 1;
     }
 
@@ -126,16 +169,15 @@ int suppressionElectionHandler(SupprimeElectionCmd * commande, sqlite3* db, char
 
     int election_id = Election_getIdFromNumeroID(db, commande->identifiant, strlen(commande->identifiant));
 
-    if (election_id != -1) {
+    if (election_id == -1) { // si ça existe pass
+        retour("L'élection n'existe pas.", messageRetour);
+        return 1;
+    } else {
         deleteElection(
                 db,
                 election_id
         );
-        printf("L'élection %s a bien été supprimée\n", commande->identifiant);
-
-    } else {
-        erreur("L'élection n'existe pas.\n");
-        return 1;
+        retour(format("L'élection %s a bien été supprimée", commande->identifiant), messageRetour);
     }
 
     return 0;
@@ -143,12 +185,55 @@ int suppressionElectionHandler(SupprimeElectionCmd * commande, sqlite3* db, char
 }
 
 int lectureElectionHandler(LireElectionCmd * commande, sqlite3* db, char* messageRetour){
-    //printf("Je suis le handler lectureElectionHandler, j'ai reçu une commande de signature %s", commande->signature);
+    int election_id = Election_getIdFromNumeroID(db, commande->identifiant, strlen(commande->identifiant));
+
+    if (election_id == -1) { // si ça existe pass
+        retour("L'élection n'existe pas.", messageRetour);
+        return 1;
+    } else {
+        Election election;
+        readElection(db, election_id, &election);
+
+        retour(format(
+                "ID: %s,\n"
+                "Question: %s,\n"
+                "Date de début: %s,\n"
+                "Date de fin: %s,\n"
+                "Statut: %s\n",
+                election.identifiant,
+                election.question,
+                election.dateDebut,
+                election.dateFin,
+                status_str[election.status]
+                ),
+               messageRetour
+                );
+    }
     return 0;
 }
 
 int listeElectionHandler(ListeElectionsCmd * commande, sqlite3* db, char* messageRetour){
-    //printf("Je suis le handler listeElectionHandler, j'ai reçu une commande de signature %s", commande->signature);
+
+    Election *elections;
+    int numElections;
+    listeElection(db, &elections, &numElections);
+
+    for (int i = 0; i < numElections; i++) {
+        retour(format(
+                "ID: %s,\n"
+                "Question: %s,\n"
+                "Date de début: %s,\n"
+                "Date de fin: %s,\n"
+                "Statut: %s\n",
+                elections[i].identifiant,
+                elections[i].question,
+                elections[i].dateDebut,
+                elections[i].dateFin,
+                status_str[elections[i].status]
+        ),
+               messageRetour);
+    }
+
     return 0;
 }
 
@@ -200,7 +285,7 @@ int handler(Commande* commande, sqlite3* db, char* messageRetour){
         case AJOUT_VOTE: return ajoutVoteHandler((AjoutVoteCmd *)&(commande->commande), db, messageRetour);
             break;
         default:
-            printf("Commande non-reconnue\n");
+            retour("Message non reconnu", messageRetour);
             return 1;
     }
 }
