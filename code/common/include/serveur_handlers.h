@@ -8,6 +8,6 @@
 #ifndef SERVEUR_HANDLERS_H
 #define SERVEUR_HANDLERS_H
 
-int handler(Commande* commande, sqlite3* db, char* messageRetour);
+int handler(Commande* commande, sqlite3* db, char** messageRetour);
 
 #endif //SERVEUR_HANDLERS_H

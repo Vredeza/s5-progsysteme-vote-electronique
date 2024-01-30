@@ -1,19 +1,25 @@
 #include "../common/include/votechain.h"
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include "../common/include/circular_buffer.h"
 #include "../common/include/serveur_handlers.h"
 #include "../common/include/serveur_vote.h"
 
-#define TAILLE_TABLEAU 8
+#define TAILLE_TABLEAU_COMMANDES 8
+#define TAILLE_TABLEAU_MESSAGES 8
 
 sqlite3 *db;
-CircularBuffer tableauEntree;
+CircularBuffer tableauCommandes, tableauMessages;
 pthread_t traitementPid;
-int stopTraitement = 0;
 
-void pushCommande(Commande* commande){
-    enqueue(&tableauEntree, commande);
+void pushCommande(Commande *commande){
+    enqueue(&tableauCommandes, commande);
+}
+
+void pullCommande(Commande *commande){
+    // tableau à réparer
 }
 
 int serverInit(const char *db_path){
@@ -27,23 +33,39 @@ int serverInit(const char *db_path){
         database_init(db);
     }
 
-    // initialisation du tableau de commandes
-    initCircularBuffer(&tableauEntree, TAILLE_TABLEAU);
+    // initialisation des tableaux circulaires
+    initCircularBuffer(&tableauCommandes, TAILLE_TABLEAU_COMMANDES);
+    initCircularBuffer(&tableauMessages, TAILLE_TABLEAU_MESSAGES);
 
-    // Exécution du thread de traitement
+    // exécution du thread de traitement
     if (pthread_create(&traitementPid, NULL, traitementThread, NULL) != 0){
         printf("Erreur lors de la création du thread\n");
         return 1;
     }
+    return 0;
+}
+
+int serverStop(){
+    if (pthread_cancel(traitementPid) != 0) {
+        printf("Erreur lors de l'arrêt du thread\n");
+        return 1;
+    }
+    printf("Serveur brutalement tué\n");
+    return 0;
 }
 
 void* traitementThread(void* arg){
-    CircularBuffer* cbMessage = (CircularBuffer*) arg;
-    while (!stopTraitement) {
-        Commande commande = *dequeue(&tableauEntree);
-        int reponse = handler(&commande, db);
-        sprintf(commande.commande.messageRetour.message, "Réponse: %d", reponse);
-        enqueue(cbMessage, &commande);
+    while (1){
+        Commande *commande = dequeue(&tableauCommandes);
+        Commande commandeRetour = {
+                MESSAGE_RETOUR
+        };
+        strcpy(commandeRetour.signature, commande->signature);
+        char *messageRetour;
+        handler(commande, db, &messageRetour);
+        printf("Message: %s\n", messageRetour);
+        strcpy(commandeRetour.commande.messageRetour.message, messageRetour);
+        enqueue(&tableauMessages, &commandeRetour);
+        free(messageRetour);
     }
-    pthread_exit(NULL);
 }
