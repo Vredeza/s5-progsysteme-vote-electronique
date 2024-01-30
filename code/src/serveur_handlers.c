@@ -25,7 +25,7 @@ int electionExiste(Election* election, sqlite3* db) {
     return Election_getIdFromNumeroID(db, election->identifiant, strlen(election->identifiant));
 }
 
-int ajoutElecteurHandler(AjoutElecteurCmd* commande, sqlite3* db){
+int ajoutElecteurHandler(AjoutElecteurCmd* commande, sqlite3* db, char* messageRetour){
 
     int electeur_extiste = electeurExists(db, commande->identifiant, strlen(commande->identifiant));
 
@@ -40,7 +40,7 @@ int ajoutElecteurHandler(AjoutElecteurCmd* commande, sqlite3* db){
     return 0;
 }
 
-int suppressionElecteurHandler(SupprimeElecteurCmd * commande, sqlite3* db){
+int suppressionElecteurHandler(SupprimeElecteurCmd * commande, sqlite3* db, char* messageRetour){
 
     int electeur_extiste = electeurExists(db, commande->identifiant, strlen(commande->identifiant));
 
@@ -55,7 +55,7 @@ int suppressionElecteurHandler(SupprimeElecteurCmd * commande, sqlite3* db){
     return 0;
 }
 
-int estPresentElecteurHandler(EstPresentCmd * commande, sqlite3* db){
+int estPresentElecteurHandler(EstPresentCmd * commande, sqlite3* db, char* messageRetour){
 
     int electeur_extiste = electeurExists(db, commande->identifiant, strlen(commande->identifiant));
 
@@ -69,7 +69,7 @@ int estPresentElecteurHandler(EstPresentCmd * commande, sqlite3* db){
     return 0;
 }
 
-int listeElecteurHandler(ListeElecteursCmd * commande, sqlite3* db){
+int listeElecteurHandler(Commande * commande, sqlite3* db, char* messageRetour){
 
     char **tableauElecteurs;
     int nombreElecteurs;
@@ -79,6 +79,7 @@ int listeElecteurHandler(ListeElecteursCmd * commande, sqlite3* db){
     if (result) {
         // Utilisez le tableau d'électeurs comme nécessaire
         for (int i = 0; i < nombreElecteurs; i++) {
+            //messageRetour += "Électeur numéroID : "+tableauElecteurs[i]+"\n";;
             printf("Électeur numéroID : %s\n", tableauElecteurs[i]);
             // N'oubliez pas de libérer la mémoire allouée pour chaque élément du tableau
             free(tableauElecteurs[i]);
@@ -93,12 +94,12 @@ int listeElecteurHandler(ListeElecteursCmd * commande, sqlite3* db){
     return 0;
 }
 
-int majElecteurHandler(MAJElecteurCmd * commande, sqlite3* db){
+int majElecteurHandler(MAJElecteurCmd * commande, sqlite3* db, char* messageRetour){
     //printf("Je suis le handler MAJElecteur, j'ai reçu une commande de signature %s", commande->signature);
     return 0;
 }
 
-int ajoutElectionHandler(AjoutElectionCmd * commande, sqlite3* db){
+int ajoutElectionHandler(AjoutElectionCmd * commande, sqlite3* db, char* messageRetour){
     int election_existe = electionExiste(commande->election, db);
 
     if (election_existe == -1) {
@@ -121,7 +122,7 @@ int ajoutElectionHandler(AjoutElectionCmd * commande, sqlite3* db){
     return 0;
 }
 
-int suppressionElectionHandler(SupprimeElectionCmd * commande, sqlite3* db){
+int suppressionElectionHandler(SupprimeElectionCmd * commande, sqlite3* db, char* messageRetour){
 
     int election_id = Election_getIdFromNumeroID(db, commande->identifiant, strlen(commande->identifiant));
 
@@ -141,27 +142,27 @@ int suppressionElectionHandler(SupprimeElectionCmd * commande, sqlite3* db){
 
 }
 
-int lectureElectionHandler(LireElectionCmd * commande, sqlite3* db){
+int lectureElectionHandler(LireElectionCmd * commande, sqlite3* db, char* messageRetour){
     //printf("Je suis le handler lectureElectionHandler, j'ai reçu une commande de signature %s", commande->signature);
     return 0;
 }
 
-int listeElectionHandler(ListeElectionsCmd * commande, sqlite3* db){
+int listeElectionHandler(ListeElectionsCmd * commande, sqlite3* db, char* messageRetour){
     //printf("Je suis le handler listeElectionHandler, j'ai reçu une commande de signature %s", commande->signature);
     return 0;
 }
 
-int majElectionHandler(MAJElectionCmd * commande, sqlite3* db){
+int majElectionHandler(MAJElectionCmd * commande, sqlite3* db, char* messageRetour){
     //printf("Je suis le handler majElectionHandler, j'ai reçu une commande de signature %s", commande->signature);
     return 0;
 }
 
-int resultatElectionHandler(ResultatElectionCmd * commande, sqlite3* db){
+int resultatElectionHandler(ResultatElectionCmd * commande, sqlite3* db, char* messageRetour){
 
     return 0;
 }
 
-int ajoutVoteHandler(AjoutVoteCmd * commande, sqlite3* db){
+int ajoutVoteHandler(AjoutVoteCmd * commande, sqlite3* db, char* messageRetour){
     //printf("Je suis le handler ajoutVoteHandler, j'ai reçu une commande de signature %s", commande->signature);
     return 0;
 }
@@ -170,33 +171,33 @@ int ajoutVoteHandler(AjoutVoteCmd * commande, sqlite3* db){
  * Gère une commande passée en paramètre.
  * Stratégie : délègue le travail à un handler spécifique. Voir command pattern.
  */
-int handler(Commande* commande, sqlite3* db){
+int handler(Commande* commande, sqlite3* db, char* messageRetour){
     switch (commande->type) {
         case NOP: return NOPHandler();
             break;
-        case AJOUT_ELECTEUR: return ajoutElecteurHandler((AjoutElecteurCmd*)&(commande->commande), db);
+        case AJOUT_ELECTEUR: return ajoutElecteurHandler((AjoutElecteurCmd*)&(commande->commande), db, messageRetour);
             break;
-        case SUPPRIME_ELECTEUR: return suppressionElecteurHandler((SupprimeElecteurCmd *)&(commande->commande), db);
+        case SUPPRIME_ELECTEUR: return suppressionElecteurHandler((SupprimeElecteurCmd *)&(commande->commande), db, messageRetour);
             break;
-        case EST_PRESENT: return estPresentElecteurHandler((EstPresentCmd *)&(commande->commande), db);
+        case EST_PRESENT: return estPresentElecteurHandler((EstPresentCmd *)&(commande->commande), db, messageRetour);
             break;
-        case LISTE_ELECTEUR: return listeElecteurHandler((ListeElecteursCmd *)&(commande->commande), db);
+        case LISTE_ELECTEUR: return listeElecteurHandler((ListeElecteursCmd *)&(commande->commande), db, messageRetour);
             break;
-        case METTRE_A_JOUR_ELECTEUR: return majElecteurHandler((MAJElecteurCmd *)&(commande->commande), db);
+        case METTRE_A_JOUR_ELECTEUR: return majElecteurHandler((MAJElecteurCmd *)&(commande->commande), db, messageRetour);
             break;
-        case AJOUT_ELECTION: return ajoutElectionHandler((AjoutElectionCmd *)&(commande->commande), db);
+        case AJOUT_ELECTION: return ajoutElectionHandler((AjoutElectionCmd *)&(commande->commande), db, messageRetour);
             break;
-        case SUPPRIME_ELECTION: return suppressionElectionHandler((SupprimeElectionCmd *)&(commande->commande), db);
+        case SUPPRIME_ELECTION: return suppressionElectionHandler((SupprimeElectionCmd *)&(commande->commande), db, messageRetour);
             break;
-        case LIRE_ELECTION: return lectureElectionHandler((LireElectionCmd *)&(commande->commande), db);
+        case LIRE_ELECTION: return lectureElectionHandler((LireElectionCmd *)&(commande->commande), db, messageRetour);
             break;
-        case LISTE_ELECTION: return listeElectionHandler((ListeElectionsCmd *)&(commande->commande), db);
+        case LISTE_ELECTION: return listeElectionHandler((ListeElectionsCmd *)&(commande->commande), db, messageRetour);
             break;
-        case METTRE_A_JOUR_ELECTION: return majElectionHandler((MAJElectionCmd *)&(commande->commande), db);
+        case METTRE_A_JOUR_ELECTION: return majElectionHandler((MAJElectionCmd *)&(commande->commande), db, messageRetour);
             break;
-        case RESULTAT_ELECTION: return resultatElectionHandler((ResultatElectionCmd *)&(commande->commande), db);
+        case RESULTAT_ELECTION: return resultatElectionHandler((ResultatElectionCmd *)&(commande->commande), db, messageRetour);
             break;
-        case AJOUT_VOTE: return ajoutVoteHandler((AjoutVoteCmd *)&(commande->commande), db);
+        case AJOUT_VOTE: return ajoutVoteHandler((AjoutVoteCmd *)&(commande->commande), db, messageRetour);
             break;
         default:
             printf("Commande non-reconnue\n");
