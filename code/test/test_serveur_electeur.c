@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
 
         //SUPPRIME_ELECTEUR
         Commande commande2 = {
-                SUPPRIME_ELECTEUR,
+                LISTE_ELECTEUR,
                 "MaSignature",
                 {"MonIdentifiantCommande"}
         };

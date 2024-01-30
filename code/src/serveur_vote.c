@@ -16,7 +16,7 @@ void pushCommande(Commande* commande){
     enqueue(&tableauEntree, commande);
 }
 
-void serverInit(const char *db_path){
+int serverInit(const char *db_path){
     // initialisation de la base de données
     int needInit = database_exists(db_path);
     db = database_open(db_path);

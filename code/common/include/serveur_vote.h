@@ -8,7 +8,7 @@
 #include "./serveur_handlers.h"
 
 void pushCommande(Commande* commande);
-void serverInit(const char *db_path);
+int serverInit(const char *db_path);
 void* traitementThread(void* arg);
 
 #endif //SERVEUR_VOTE_H

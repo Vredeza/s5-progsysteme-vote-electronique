@@ -5,6 +5,9 @@
 #include "../common/include/serveur_handlers.h"
 #include "stdio.h"
 #include "string.h"
+#include <glib.h>
+#include <stdlib.h>
+#include <sys/stat.h>
 
 void erreur(char* message) {
     printf("Erreur : %s\n", message);
@@ -68,7 +71,25 @@ int estPresentElecteurHandler(EstPresentCmd * commande, sqlite3* db){
 
 int listeElecteurHandler(ListeElecteursCmd * commande, sqlite3* db){
 
-    printf("Je suis le handler listeElecteurHandler, j'ai reçu une commande.");
+    char **tableauElecteurs;
+    int nombreElecteurs;
+
+    int result = listeElecteur(db, &tableauElecteurs, &nombreElecteurs);
+
+    if (result) {
+        // Utilisez le tableau d'électeurs comme nécessaire
+        for (int i = 0; i < nombreElecteurs; i++) {
+            printf("Électeur numéroID : %s\n", tableauElecteurs[i]);
+            // N'oubliez pas de libérer la mémoire allouée pour chaque élément du tableau
+            free(tableauElecteurs[i]);
+        }
+
+        // Libère la mémoire allouée pour le tableau d'électeurs
+        free(tableauElecteurs);
+    }else {
+        erreur("Une erreur est survenue\n");
+        return 1;
+    }
     return 0;
 }
 

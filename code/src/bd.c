@@ -134,7 +134,7 @@ void readElecteur(sqlite3 *db, const char *numeroID, int size)
 
 }*/
 
-void listeElecteur(sqlite3 *db, char ***tableauElecteurs, int *nombreElecteurs) {
+int listeElecteur(sqlite3 *db, char ***tableauElecteurs, int *nombreElecteurs) {
 
     sqlite3_stmt *stmt;
     const char *sql = "SELECT numeroID FROM Electeur;";
@@ -144,7 +144,7 @@ void listeElecteur(sqlite3 *db, char ***tableauElecteurs, int *nombreElecteurs) 
 
     if (rc != SQLITE_OK) {
         fprintf(stderr, "Erreur lors de la préparation de la requête: %s\n", sqlite3_errmsg(db));
-        return;
+        return -1;
     }
 
     // Initialise le tableau d'électeurs
@@ -158,7 +158,7 @@ void listeElecteur(sqlite3 *db, char ***tableauElecteurs, int *nombreElecteurs) 
 
         if (!(*tableauElecteurs)) {
             fprintf(stderr, "Erreur lors de l'allocation de mémoire pour les électeurs\n");
-            return;
+            return -1;
         }
 
         // Réalise une allocation de mémoire pour le numéroID
@@ -166,7 +166,7 @@ void listeElecteur(sqlite3 *db, char ***tableauElecteurs, int *nombreElecteurs) 
 
         if (!(*tableauElecteurs)[*nombreElecteurs]) {
             fprintf(stderr, "Erreur lors de l'allocation de mémoire pour le numéroID\n");
-            return;
+            return -1;
         }
 
         // Récupère le numéroID de la base de données et le stocke dans le tableau d'électeurs
@@ -176,6 +176,7 @@ void listeElecteur(sqlite3 *db, char ***tableauElecteurs, int *nombreElecteurs) 
 
     // Finalise la requête préparée
     sqlite3_finalize(stmt);
+    return 0;
 }
 
 int electeurExists(sqlite3 *db, const char *numeroID, int size)

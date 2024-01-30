@@ -88,33 +88,4 @@ int main(int argc, char *argv[]) {
     g_free(file_path);
     g_option_context_free(context);
     return 0;
-/*    sqlite3 *db;
-
-    // Ouvre la base de données (assurez-vous d'ajuster le chemin de la base de données)
-    int rc = sqlite3_open("ma_base_de_donnees.db", &db);
-
-    if (rc != SQLITE_OK) {
-        fprintf(stderr, "Impossible d'ouvrir la base de données: %s\n", sqlite3_errmsg(db));
-        return rc;
-    }
-
-    int nombreElections;
-    // Appelle la fonction pour lister les électeurs et récupère le tableau d'élections
-    Election *elections = listeElecteur(db, &nombreElections);
-
-    if (elections) {
-        // Utilisez le tableau d'élections comme nécessaire
-        for (int i = 0; i < nombreElections; i++) {
-            printf("Identifiant: %s\nQuestion: %s\nDate de début: %s\nDate de fin: %s\n",
-                   elections[i].identifiant, elections[i].question, elections[i].dateDebut, elections[i].dateFin);
-        }
-
-        // Libère la mémoire allouée pour le tableau d'élections
-        free(elections);
-    }
-
-    // Ferme la base de données
-    sqlite3_close(db);
-
-    return 0;*/
 }
