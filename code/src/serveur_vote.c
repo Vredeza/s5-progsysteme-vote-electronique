@@ -9,6 +9,7 @@
 
 sqlite3 *db;
 CircularBuffer tableauEntree;
+pthread_t traitementPid;
 int stopTraitement = 0;
 
 void pushCommande(Commande* commande){
@@ -28,6 +29,18 @@ void serverInit(const char *db_path){
 
     // initialisation du tableau de commandes
     initCircularBuffer(&tableauEntree, TAILLE_TABLEAU);
+
+    // Exécution du thread de traitement
+    if (pthread_create(&traitementPid, NULL, traitementThread, NULL) != 0) {
+        printf("Erreur lors de la création du thread\n");
+        return 1;
+    }
+
+    // Attente de la fin du thread de traitement
+    if (pthread_join(traitementPid, NULL) != 0) {
+        fprintf(stderr, "Erreur lors du join du thread\n");
+        return 1;
+    }
 }
 
 void* traitementThread(void* arg){
@@ -38,5 +51,5 @@ void* traitementThread(void* arg){
         sprintf(commande.commande.messageRetour.message, "Réponse: %d", reponse);
         enqueue(cbMessage, &commande);
     }
-    return NULL;
+    pthread_exit(NULL);
 }
