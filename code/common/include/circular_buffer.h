@@ -23,6 +23,6 @@ void cleanupCircularBuffer(CircularBuffer *cb);
 int isFull(CircularBuffer *cb);
 int isEmpty(CircularBuffer *cb);
 void enqueue(CircularBuffer *cb, Commande *commande);
-Commande *dequeue(CircularBuffer *cb);
+void dequeue(CircularBuffer *cb, Commande *commande);
 
 #endif // CIRCULAR_BUFFER_H

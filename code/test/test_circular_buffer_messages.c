@@ -41,7 +41,8 @@ void* dequeueThread(void* arg) {
     CircularBuffer* cb = (CircularBuffer*)arg;
     for (int i = 0; i < 4; ++i) {
         usleep(rand() % 800000 + 400000);
-        Commande *commande = dequeue(cb);
+        Commande *commande;
+        dequeue(cb, commande);
         printf("Dequeued: %u %s\n", commande->type, commande->commande.ajoutElecteur.identifiant);
         printf("Réponse reçue: %s\n", commande->commande.messageRetour.message);
     }

@@ -19,7 +19,7 @@ void pushCommande(Commande *commande){
 }
 
 void pullCommande(Commande *commande){
-    // tableau à réparer
+    dequeue(&tableauMessages, commande);
 }
 
 int serverInit(const char *db_path){
@@ -56,16 +56,17 @@ int serverStop(){
 
 void* traitementThread(void* arg){
     while (1){
-        Commande *commande = dequeue(&tableauCommandes);
-        Commande commandeRetour = {
-                MESSAGE_RETOUR
-        };
-        strcpy(commandeRetour.signature, commande->signature);
+        Commande commande;
+        dequeue(&tableauCommandes, &commande);
         char *messageRetour;
-        handler(commande, db, &messageRetour);
-        printf("Message: %s\n", messageRetour);
-        strcpy(commandeRetour.commande.messageRetour.message, messageRetour);
-        enqueue(&tableauMessages, &commandeRetour);
-        free(messageRetour);
+        handler(&commande, db, &messageRetour);
+
+        Commande *commandeRetour = (Commande *)malloc(sizeof(Commande));
+        memset(commandeRetour, 0, sizeof(Commande));
+        commandeRetour->type = MESSAGE_RETOUR;
+        strcpy(commandeRetour->signature, commande.signature);
+        strcpy(commandeRetour->commande.messageRetour.message, messageRetour);
+
+        enqueue(&tableauMessages, commandeRetour);
     }
 }

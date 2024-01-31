@@ -47,12 +47,12 @@ void enqueue(CircularBuffer *cb, Commande *commande) {
     pthread_mutex_unlock(&cb->mutex);
 }
 
-Commande *dequeue(CircularBuffer *cb) {
+void dequeue(CircularBuffer *cb, Commande *commande) {
     pthread_mutex_lock(&cb->mutex);
     while (isEmpty(cb)) {
         pthread_cond_wait(&cb->not_empty, &cb->mutex);
     }
-    Commande *commande = cb->buffer[cb->front];
+    *commande = *(cb->buffer[cb->front]);
     if (cb->front == cb->rear) {
         cb->front = -1;
         cb->rear = -1;
@@ -61,5 +61,4 @@ Commande *dequeue(CircularBuffer *cb) {
     }
     pthread_cond_signal(&cb->not_full);
     pthread_mutex_unlock(&cb->mutex);
-    return commande;
 }

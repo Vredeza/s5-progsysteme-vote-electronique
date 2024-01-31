@@ -10,6 +10,9 @@
 #define ID_SIZE 10
 #define BALLOT_SIZE 1
 
+void printCommandeAddresss(Commande *commande) {
+    printf("Adresse mémoire de la commande : %p\n", (void *)commande);
+}
 int main(int argc, char *argv[])
 {
     GError *error = NULL;
@@ -65,6 +68,7 @@ int main(int argc, char *argv[])
                 {"beatrice"}
         };
 
+        // je pousse toutes les commandes dans le buffer de commandes
         pushCommande(&commandeAjoutBeatrice);
         pushCommande(&commandeAjoutBeatrice);// Affichera une erreur parce que Béatrice existe déjà
         pushCommande(&commandeEstCeQueBeatriceExiste);
@@ -73,7 +77,18 @@ int main(int argc, char *argv[])
         pushCommande(&commandeAjoutFrederika);
         pushCommande(&commandeEstCeQueBeatriceExiste);
 
+        // on attend que le serveur réfléchisse
         sleep(3);
+
+        // on tire 7 messages (le 7 coincide avec le nombre de commandes qu'on a poussé) du buffer de messages et on print
+        for (int i = 0; i < 7; i++) {
+            Commande *commande = malloc(sizeof(Commande));
+            pullCommande(commande);
+            printf("Retour: %s\n", commande->commande.messageRetour.message);
+            free(commande);
+        }
+
+        // on assassine le serveur
         serverStop();
     }
     else
