@@ -27,7 +27,7 @@ int Election_getIdFromNumeroID(sqlite3 *db, const char *numeroID, int size);
 void readElection(sqlite3 *db, int id, Election *election);
 void listeElection(sqlite3 *db, Election **elections, int *numElections);
 
-void Election_castVote(sqlite3 *db, int idVotant, int idElection, mpz_t encrypted_ballot, int ballotSize, const char *hashValidation);
+void Election_castVote(sqlite3 *db, int idVotant, int idElection, const void *ballot_data, int ballotSize, const char *hashValidation);
 // int Election_resultat(sqlite3 *db, int localid, int *numberOption0, int *numberOption1, int *totalVotes);
 void Election_processVotes(sqlite3 *db, int electionId, mpz_t lambda, mpz_t mu, mpz_t n, int *p_option0, int *p_option1, int *p_totalvotes);
 

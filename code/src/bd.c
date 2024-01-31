@@ -467,41 +467,26 @@ void deleteElection(sqlite3 *db, int id)
 
 // usecases election
 
-void Election_castVote(sqlite3 *db, int idVotant, int idElection, mpz_t encrypted_ballot, int ballotSize, const char *hashValidation)
-{
+void Election_castVote(sqlite3 *db, int idVotant, int idElection, const void *ballot_data, int ballotSize, const char *hashValidation) {
     sqlite3_stmt *stmt;
     const char *sql = "INSERT INTO Vote (idVotant, idElection, timestamp, ballot, hashValidation) VALUES (?, ?, datetime('now'), ?, ?);";
 
-    // Convert mpz_t to binary for storing
-    size_t size;
-    unsigned char *ballot_data = (unsigned char *)mpz_export(NULL, &size, 1, 1, 0, 0, encrypted_ballot);
-    ballotSize = (int)size; // Update the size of the binary data
-
-    if (sqlite3_prepare_v2(db, sql, -1, &stmt, NULL) == SQLITE_OK)
-    {
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, NULL) == SQLITE_OK) {
         sqlite3_bind_int(stmt, 1, idVotant);
         sqlite3_bind_int(stmt, 2, idElection);
         sqlite3_bind_blob(stmt, 3, ballot_data, ballotSize, SQLITE_STATIC);
         sqlite3_bind_text(stmt, 4, hashValidation, -1, SQLITE_STATIC);
 
-        if (sqlite3_step(stmt) != SQLITE_DONE)
-        {
+        if (sqlite3_step(stmt) != SQLITE_DONE) {
             fprintf(stderr, "Erreur lors de l'insertion: %s\n", sqlite3_errmsg(db));
-        }
-        else
-        {
+        } else {
             printf("Vote ajouté avec succès\n");
         }
 
         sqlite3_finalize(stmt);
-    }
-    else
-    {
+    } else {
         fprintf(stderr, "Erreur de préparation: %s\n", sqlite3_errmsg(db));
     }
-
-    // Free the allocated memory for ballot_data
-    free(ballot_data);
 }
 
 //
@@ -509,46 +494,38 @@ void Election_processVotes(sqlite3 *db, int electionId, mpz_t lambda, mpz_t mu, 
 {
     sqlite3_stmt *stmt;
     const char *sql = "SELECT ballot FROM Vote WHERE idElection = ?;";
+
     *p_totalvotes = 0;
     *p_option0 = 0;
     *p_option1 = 0;
 
-    if (sqlite3_prepare_v2(db, sql, -1, &stmt, NULL) == SQLITE_OK)
-    {
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, NULL) == SQLITE_OK) {
         sqlite3_bind_int(stmt, 1, electionId);
 
-        while (sqlite3_step(stmt) == SQLITE_ROW)
-        {
-            const void *ballotBlob = sqlite3_column_blob(stmt, 0);
+        while (sqlite3_step(stmt) == SQLITE_ROW) {
+            const unsigned char *ballotBlob = (const unsigned char *)sqlite3_column_blob(stmt, 0);
             int blobSize = sqlite3_column_bytes(stmt, 0);
 
-            // Decrypt le vote
             mpz_t encrypted_ballot, decrypted_ballot;
             mpz_init(encrypted_ballot);
+            mpz_init(decrypted_ballot);
+
             mpz_import(encrypted_ballot, blobSize, 1, 1, 0, 0, ballotBlob);
 
-            mpz_init(decrypted_ballot);
             decrypt(decrypted_ballot, encrypted_ballot, lambda, mu, n);
 
-            char vote = (char)mpz_get_ui(decrypted_ballot);
-            if (vote)
-            {
-                *p_option1 = *p_option1 + 1;
-            }
-            else
-            {
-                *p_option0 = *p_option0 + 1;
-            }
+            unsigned long vote = mpz_get_ui(decrypted_ballot);
 
-            *p_totalvotes = *p_totalvotes + 1;
+            if (vote == 0x01) (*p_option0)++;
+            else if (vote == 0x00) (*p_option1)++;
+
+            (*p_totalvotes)++;
 
             mpz_clears(encrypted_ballot, decrypted_ballot, NULL);
         }
 
         sqlite3_finalize(stmt);
-    }
-    else
-    {
+    } else {
         fprintf(stderr, "Erreur de préparation: %s\n", sqlite3_errmsg(db));
     }
 }
